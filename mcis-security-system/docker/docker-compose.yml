@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.2.5
+    container_name: mcis-keycloak
+
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin123
+
+    command: start-dev
+
+    ports:
+      - "9090:8080"

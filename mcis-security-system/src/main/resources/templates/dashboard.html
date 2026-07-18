@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>MCIS Dashboard</title>
+
+</head>
+
+<body>
+
+<h1>Military Command Information System</h1>
+
+<hr>
+
+<h2>Welcome</h2>
+
+<p th:text="${username}"></p>
+
+<h3>Your Roles</h3>
+
+<ul>
+
+<li th:each="role : ${authorities}"
+    th:text="${role.authority}">
+</li>
+
+</ul>
+
+<hr>
+<a href="/missions" class="btn btn-success mt-3">
+Mission Management
+</a>
+<a href="/audit"
+   class="btn btn-warning mt-3">
+
+Audit Logs
+
+</a>
+
+<a href="/logout">Logout</a>
+
+</body>
+
+</html>
