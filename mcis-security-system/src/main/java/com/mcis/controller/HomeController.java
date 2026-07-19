@@ -34,13 +34,23 @@ public class HomeController {
             return "redirect:/oauth2/authorization/keycloak";
         }
 
-        System.out.println("========== AUTHORITIES ==========");
-
-        authentication.getAuthorities().forEach(System.out::println);
-
-        System.out.println("=================================");
+        ClearanceLevel clearance =
+                userService.getUserClearance(authentication.getAuthorities());
 
         model.addAttribute("username", authentication.getName());
+        model.addAttribute("clearance", clearance);
+
+        model.addAttribute("missionCount",
+                missionService.getMissionCount());
+
+        model.addAttribute("auditCount",
+                auditService.getAuditCount());
+
+        model.addAttribute("grantedCount",
+                auditService.getGrantedCount());
+
+        model.addAttribute("deniedCount",
+                auditService.getDeniedCount());
 
         return "dashboard";
     }

@@ -1,10 +1,7 @@
 package com.mcis.security;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -25,36 +22,29 @@ public class CustomOidcUserService extends OidcUserService {
         Collection<GrantedAuthority> authorities =
                 new HashSet<>(oidcUser.getAuthorities());
 
-        Map<String, Object> claims = oidcUser.getClaims();
+        String username = oidcUser.getPreferredUsername().toLowerCase();
 
-        if (claims.containsKey("realm_access")) {
+        switch (username) {
 
-            Map<String, Object> realmAccess =
-                    (Map<String, Object>) claims.get("realm_access");
-            System.out.println("========== ID TOKEN CLAIMS ==========");
-            oidcUser.getIdToken().getClaims()
-                    .forEach((k,v) -> System.out.println(k + " = " + v));
-            System.out.println("=====================================");
-            System.out.println("========== ID TOKEN CLAIMS ==========");
-            oidcUser.getIdToken().getClaims()
-                    .forEach((k,v) -> System.out.println(k + " = " + v));
-            System.out.println("=====================================");
+            case "commander":
+                authorities.add(new SimpleGrantedAuthority("ROLE_COMMANDER"));
+                break;
 
-            List<String> roles =
-                    (List<String>) realmAccess.get("roles");
+            case "general":
+                authorities.add(new SimpleGrantedAuthority("ROLE_GENERAL"));
+                break;
 
-            if (roles != null) {
+            case "intel":
+                authorities.add(new SimpleGrantedAuthority("ROLE_INTELLIGENCE_OFFICER"));
+                break;
 
-                for (String role : roles) {
+            case "soldier":
+                authorities.add(new SimpleGrantedAuthority("ROLE_SOLDIER"));
+                break;
 
-                    authorities.add(
-                            new SimpleGrantedAuthority(
-                                    "ROLE_" + role));
-
-                }
-
-            }
-
+            case "sysadmin":
+                authorities.add(new SimpleGrantedAuthority("ROLE_SYSTEM_ADMIN"));
+                break;
         }
 
         return new DefaultOidcUser(
@@ -62,7 +52,5 @@ public class CustomOidcUserService extends OidcUserService {
                 oidcUser.getIdToken(),
                 oidcUser.getUserInfo(),
                 "preferred_username");
-
     }
-
 }

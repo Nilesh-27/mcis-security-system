@@ -5,7 +5,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import com.mcis.entity.Mission;
 import com.mcis.enums.ClearanceLevel;
 import com.mcis.service.AuditService;
@@ -40,8 +41,12 @@ public class MissionController {
     public String missions(Authentication authentication,
                            Model model) {
 
+        if (authentication == null) {
+            return "redirect:/oauth2/authorization/keycloak";
+        }
+
         ClearanceLevel clearance =
-                userService.getUserClearance(authentication.getName());
+                userService.getUserClearance(authentication.getAuthorities());
 
         model.addAttribute(
                 "missions",
@@ -51,6 +56,33 @@ public class MissionController {
 
         return "missions";
     }
+    
+    @GetMapping("/missions/new")
+    public String newMission(Model model) {
+
+        model.addAttribute("mission", new Mission());
+
+        return "mission-form";
+    }
+    
+    @PostMapping("/missions/save")
+    public String saveMission(
+            @ModelAttribute Mission mission) {
+
+        missionService.saveMission(mission);
+
+        return "redirect:/missions";
+    }
+    
+    @GetMapping("/missions/delete/{id}")
+    public String deleteMission(
+            @PathVariable Long id) {
+
+        missionService.deleteMission(id);
+
+        return "redirect:/missions";
+    }
+    
     @GetMapping("/missions/{id}")
     public String missionDetails(
             @PathVariable Long id,
@@ -65,7 +97,7 @@ public class MissionController {
         }
 
         ClearanceLevel clearance =
-                userService.getUserClearance(authentication.getName());
+                userService.getUserClearance(authentication.getAuthorities());
 
         boolean allowed =
                 bellLaPadulaService.canRead(

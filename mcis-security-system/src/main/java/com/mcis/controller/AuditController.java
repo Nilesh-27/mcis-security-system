@@ -27,7 +27,7 @@ public class AuditController {
                         Model model) {
 
         ClearanceLevel clearance =
-                userService.getUserClearance(authentication.getName());
+                userService.getUserClearance(authentication.getAuthorities());
 
         model.addAttribute(
                 "logs",

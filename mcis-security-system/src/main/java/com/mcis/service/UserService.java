@@ -1,5 +1,8 @@
 package com.mcis.service;
 
+import java.util.Collection;
+
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import com.mcis.enums.ClearanceLevel;
@@ -7,27 +10,26 @@ import com.mcis.enums.ClearanceLevel;
 @Service
 public class UserService {
 
-    public ClearanceLevel getUserClearance(String username) {
+    public ClearanceLevel getUserClearance(
+            Collection<? extends GrantedAuthority> authorities) {
 
-        switch (username.toLowerCase()) {
+        for (GrantedAuthority authority : authorities) {
 
-            case "commander":
-                return ClearanceLevel.TOP_SECRET;
+            switch (authority.getAuthority()) {
 
-            case "intel":
-                return ClearanceLevel.SECRET;
+                case "ROLE_COMMANDER":
+                case "ROLE_SYSTEM_ADMIN":
+                    return ClearanceLevel.TOP_SECRET;
 
-            case "general":
-                return ClearanceLevel.SECRET;
+                case "ROLE_GENERAL":
+                case "ROLE_INTELLIGENCE_OFFICER":
+                    return ClearanceLevel.SECRET;
 
-            case "officer":
-                return ClearanceLevel.CONFIDENTIAL;
-
-            case "soldier":
-                return ClearanceLevel.RESTRICTED;
-
-            default:
-                return ClearanceLevel.RESTRICTED;
+                case "ROLE_SOLDIER":
+                    return ClearanceLevel.RESTRICTED;
+            }
         }
+
+        return ClearanceLevel.RESTRICTED;
     }
 }
