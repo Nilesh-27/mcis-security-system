@@ -37,10 +37,17 @@ public class MissionController {
     }
 
     @GetMapping("/missions")
-    public String missions(Model model) {
+    public String missions(Authentication authentication,
+                           Model model) {
 
-        model.addAttribute("missions",
-                missionService.getAllMissions());
+        ClearanceLevel clearance =
+                userService.getUserClearance(authentication.getName());
+
+        model.addAttribute(
+                "missions",
+                missionService.getAllowedMissions(clearance));
+
+        model.addAttribute("clearance", clearance);
 
         return "missions";
     }
@@ -67,13 +74,15 @@ public class MissionController {
 
         if (!allowed) {
 
-            auditService.log(
-                    authentication.getName(),
-                    clearance.name(),
-                    "VIEW_MISSION",
-                    mission.getMissionName(),
-                    "DENIED",
-                    request.getRemoteAddr());
+        	auditService.log(
+        	        authentication.getName(),
+        	        clearance.name(),
+        	        "VIEW_MISSION",
+        	        mission.getMissionName(),
+        	        mission.getClassification().name(),
+        	        "DENIED",
+        	        request.getRemoteAddr()
+        	);
 
             return "access-denied";
         }
@@ -86,8 +95,10 @@ public class MissionController {
                 clearance.name(),
                 "VIEW_MISSION",
                 mission.getMissionName(),
+                mission.getClassification().name(),
                 "GRANTED",
-                request.getRemoteAddr());
+                request.getRemoteAddr()
+        );
 
         return "mission-details";
     }

@@ -25,6 +25,7 @@ public class AuditLog {
     private String ipAddress;
 
     private LocalDateTime timestamp;
+    private String missionClassification;
 
     public AuditLog() {
     }
@@ -92,4 +93,12 @@ public class AuditLog {
     public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
     }
+
+	public String getMissionClassification() {
+		return missionClassification;
+	}
+
+	public void setMissionClassification(String missionClassification) {
+		this.missionClassification = missionClassification;
+	}
 }

@@ -31,6 +31,14 @@ public class CustomOidcUserService extends OidcUserService {
 
             Map<String, Object> realmAccess =
                     (Map<String, Object>) claims.get("realm_access");
+            System.out.println("========== ID TOKEN CLAIMS ==========");
+            oidcUser.getIdToken().getClaims()
+                    .forEach((k,v) -> System.out.println(k + " = " + v));
+            System.out.println("=====================================");
+            System.out.println("========== ID TOKEN CLAIMS ==========");
+            oidcUser.getIdToken().getClaims()
+                    .forEach((k,v) -> System.out.println(k + " = " + v));
+            System.out.println("=====================================");
 
             List<String> roles =
                     (List<String>) realmAccess.get("roles");

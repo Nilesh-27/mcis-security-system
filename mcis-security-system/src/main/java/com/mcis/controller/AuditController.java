@@ -1,28 +1,39 @@
 package com.mcis.controller;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import com.mcis.enums.ClearanceLevel;
 import com.mcis.service.AuditService;
+import com.mcis.service.UserService;
 
 @Controller
 public class AuditController {
 
     private final AuditService auditService;
+    private final UserService userService;
 
-    public AuditController(AuditService auditService) {
+    public AuditController(AuditService auditService,
+                           UserService userService) {
+
         this.auditService = auditService;
+        this.userService = userService;
     }
 
     @GetMapping("/audit")
-    public String audit(Model model) {
+    public String audit(Authentication authentication,
+                        Model model) {
 
-        model.addAttribute("logs",
-                auditService.getAllLogs());
+        ClearanceLevel clearance =
+                userService.getUserClearance(authentication.getName());
+
+        model.addAttribute(
+                "logs",
+                auditService.getAllowedLogs(clearance));
 
         return "audit";
-
     }
 
 }
