@@ -53,12 +53,24 @@ public class MissionController {
                 missionService.getAllowedMissions(clearance));
 
         model.addAttribute("clearance", clearance);
+        boolean admin =
+                authentication.getAuthorities().stream()
+                        .anyMatch(a ->
+                                a.getAuthority().equals("ROLE_COMMANDER")
+                             || a.getAuthority().equals("ROLE_SYSTEM_ADMIN"));
+
+        model.addAttribute("admin", admin);
 
         return "missions";
     }
     
     @GetMapping("/missions/new")
-    public String newMission(Model model) {
+    public String newMission(Authentication authentication,
+                             Model model) {
+
+        if (!isAdmin(authentication)) {
+            return "access-denied";
+        }
 
         model.addAttribute("mission", new Mission());
 
@@ -67,16 +79,72 @@ public class MissionController {
     
     @PostMapping("/missions/save")
     public String saveMission(
-            @ModelAttribute Mission mission) {
+            @ModelAttribute Mission mission,
+            Authentication authentication,
+            HttpServletRequest request) {
+
+        if (!isAdmin(authentication)) {
+
+            auditService.log(
+                    authentication.getName(),
+                    userService.getUserClearance(authentication.getAuthorities()).name(),
+                    "CREATE_MISSION",
+                    mission.getMissionName(),
+                    mission.getClassification().name(),
+                    "DENIED",
+                    request.getRemoteAddr()
+            );
+
+            return "access-denied";
+        }
 
         missionService.saveMission(mission);
+
+        auditService.log(
+                authentication.getName(),
+                userService.getUserClearance(authentication.getAuthorities()).name(),
+                "CREATE_MISSION",
+                mission.getMissionName(),
+                mission.getClassification().name(),
+                "GRANTED",
+                request.getRemoteAddr()
+        );
 
         return "redirect:/missions";
     }
     
     @GetMapping("/missions/delete/{id}")
     public String deleteMission(
-            @PathVariable Long id) {
+            @PathVariable Long id,
+            Authentication authentication,
+            HttpServletRequest request) {
+
+        if (!isAdmin(authentication)) {
+
+            auditService.log(
+                    authentication.getName(),
+                    userService.getUserClearance(authentication.getAuthorities()).name(),
+                    "DELETE_MISSION",
+                    "Unknown",
+                    "N/A",
+                    "DENIED",
+                    request.getRemoteAddr()
+            );
+
+            return "access-denied";
+        }
+
+        Mission mission = missionService.findById(id);
+
+        auditService.log(
+                authentication.getName(),
+                userService.getUserClearance(authentication.getAuthorities()).name(),
+                "DELETE_MISSION",
+                mission.getMissionName(),
+                mission.getClassification().name(),
+                "GRANTED",
+                request.getRemoteAddr()
+        );
 
         missionService.deleteMission(id);
 
@@ -133,6 +201,13 @@ public class MissionController {
         );
 
         return "mission-details";
+    }
+    private boolean isAdmin(Authentication authentication) {
+
+        return authentication.getAuthorities().stream()
+                .anyMatch(a ->
+                        a.getAuthority().equals("ROLE_COMMANDER")
+                     || a.getAuthority().equals("ROLE_SYSTEM_ADMIN"));
     }
 
 }
